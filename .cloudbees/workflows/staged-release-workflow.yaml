@@ -1,0 +1,39 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: staged-release-workflow
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        type: string
+        required: true
+        description: This is a system-generated parameter and is required for use in application releases. Refer to https://docs.cloudbees.com/docs/cloudbees-platform/latest/applications/releases#manifest for the expected format
+metadata:
+  stages/v1alpha1:
+    - name: PROD
+      jobs:
+        - Print-Job
+        - sleep-job
+        - print-end
+jobs:
+  Print-Job:
+    steps:
+      - run: echo "starting prod deployment"
+        uses: docker://golang:1.20.3-alpine3.17
+        name: print-job
+        shell: sh
+  sleep-job:
+    needs: Print-Job
+    steps:
+      - run: sleep 90
+        uses: docker://golang:1.20.3-alpine3.17
+        name: sleep 90
+        shell: sh
+  print-end:
+    needs:
+      - sleep-job
+    steps:
+      - run: echo "sleep 90 completed and exiting"
+        uses: docker://golang:1.20.3-alpine3.17
+        name: print-end
+        shell: sh
